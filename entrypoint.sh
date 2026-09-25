@@ -1,18 +1,16 @@
 #!/bin/bash
 
-# Jalankan SSH server
+# Buat sertifikat SSL otomatis untuk Stunnel
+openssl req -new -x509 -days 365 -nodes \
+    -out /etc/stunnel/stunnel.pem \
+    -keyout /etc/stunnel/stunnel.pem \
+    -subj "/C=ID/ST=Jakarta/L=Jakarta/O=SKC/CN=railway.app"
+
+chmod 600 /etc/stunnel/stunnel.pem
+
+# Jalankan SSH server di port internal 2222
+sed -i 's/#Port 22/Port 2222/' /etc/ssh/sshd_config
 /usr/sbin/sshd
 
-# Buat direktori run haproxy jika belum ada
-mkdir -p /run/haproxy
-
-# Jalankan HAProxy dan cek error-nya secara langsung di log
-haproxy -f /etc/haproxy/haproxy.cfg -p /run/haproxy.pid &
-
-echo "=================================================="
-echo " SSH Multi-Protocol Server Aktif di Railway"
-echo " User     : ridsvpn"
-echo " Password : kancil"
-echo "=================================================="
-
-sleep infinity
+# Jalankan Stunnel di port 443 (foreground)
+stunnel4 /etc/stunnel/stunnel.conf
