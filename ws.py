@@ -1,5 +1,6 @@
 import asyncio
 import websockets
+import ssl
 import socket
 
 async def tcp_proxy(ws, reader, writer):
@@ -14,10 +15,8 @@ async def tcp_proxy(ws, reader, writer):
 
 async def handler(ws):
     try:
-        # Sambungkan ke SSH lokal di port 2222
         reader, writer = await asyncio.open_connection('127.0.0.1', 2222)
-
-        # Buat jembatan bolak-balik antara WebSocket dan SSH TCP
+        
         async def forward_ws_to_tcp():
             try:
                 async for message in ws:
@@ -34,8 +33,12 @@ async def handler(ws):
         pass
 
 async def main():
-    # Jalankan server WebSocket di port 443
-    async with websockets.serve(handler, "0.0.0.0", 443):
+    # Buat sertifikat SSL self-signed darurat untuk handle TLS port 443
+    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    ssl_context.load_cert_chain(certfile='/app/cert.pem', keyfile='/app/key.pem')
+
+    # Jalankan server WebSocket dengan enkripsi SSL di port 443
+    async with websockets.serve(handler, "0.0.0.0", 443, ssl=ssl_context):
         await asyncio.Future()
 
 if __name__ == "__main__":
