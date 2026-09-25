@@ -10,15 +10,14 @@ RUN apt-get update && apt-get install -y \
     openssl \
     && rm -rf /var/lib/apt/lists/*
 
-# Buat direktori yang dibutuhkan SSH (tambah parameter -p agar tidak error jika folder sudah ada)
+# Buat direktori yang dibutuhkan SSH
 RUN mkdir -p /var/run/sshd
 
 # Buat user ridsvpn dengan password kancil secara permanen
 RUN useradd -ms /bin/bash ridsvpn && echo 'ridsvpn:kancil' | chpasswd
 
-# Konfigurasi SSH dasar (izinkan password login, ubah port internal ke 2222)
-RUN sed -i 's/#Port 22/Port 2222/' /etc/ssh/sshd_config
-RUN sed -i 's/Port 22/Port 2222/' /etc/ssh/sshd_config
+# Konfigurasi SSH yang bersih dan aman
+RUN echo "Port 2222" >> /etc/ssh/sshd_config
 RUN sed -i 's/#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
