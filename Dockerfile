@@ -10,8 +10,8 @@ RUN apt-get update && apt-get install -y \
     openssl \
     && rm -rf /var/lib/apt/lists/*
 
-# Buat direktori yang dibutuhkan SSH
-RUN mkdir /var/run/sshd
+# Buat direktori yang dibutuhkan SSH (tambah parameter -p agar tidak error jika folder sudah ada)
+RUN mkdir -p /var/run/sshd
 
 # Buat user ridsvpn dengan password kancil secara permanen
 RUN useradd -ms /bin/bash ridsvpn && echo 'ridsvpn:kancil' | chpasswd
