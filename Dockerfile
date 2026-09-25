@@ -1,25 +1,29 @@
 FROM ubuntu:latest
 
-# Update dan instal OpenSSH server, stunnel4, python3, dan utilities
+# Update dan instal OpenSSH server, python3, haproxy, socat, dan utilities
 RUN apt-get update && apt-get install -y \
     openssh-server \
-    stunnel4 \
+    haproxy \
     python3 \
     python3-pip \
-    curl \
+    socat \
+    openssl \
     && rm -rf /var/lib/apt/lists/*
 
 # Buat direktori yang dibutuhkan SSH
 RUN mkdir /var/run/sshd
 
-# Buat user ridsvpn dengan password kancil
+# Buat user ridsvpn dengan password kancil secara permanen
 RUN useradd -ms /bin/bash ridsvpn && echo 'ridsvpn:kancil' | chpasswd
 
-# Konfigurasi SSH dasar (izinkan password login)
+# Konfigurasi SSH dasar (izinkan password login, ubah port internal ke 2222)
+RUN sed -i 's/#Port 22/Port 2222/' /etc/ssh/sshd_config
+RUN sed -i 's/Port 22/Port 2222/' /etc/ssh/sshd_config
 RUN sed -i 's/#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
-# Salin script entrypoint untuk menjalankan SSH, Stunnel, dan WS Proxy secara bersamaan
+# Salin konfigurasi dan script entrypoint
+COPY haproxy.cfg /etc/haproxy/haproxy.cfg
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
