@@ -4,7 +4,7 @@
 /usr/sbin/sshd
 
 # Jalankan Haproxy untuk menghandle port 80 dan 443
-haproxy -f /etc/haproxy/haproxy.cfg &
+exec haproxy -f /etc/haproxy/haproxy.cfg &
 
 echo "=================================================="
 echo " SSH Multi-Protocol Server Aktif di Railway"
